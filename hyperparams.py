@@ -1,29 +1,36 @@
 # scene
-res_x = 512
-res_y = 512
-scene_x = 40 #um
-scene_y = 40 #um
-ep = 1.
+res_x = 400
+res_y = 400
+scene_x = 1 #m
+scene_y = 1 #m
+ep = 8.8541878176e-12
 mu = 1.
-duration = 0.5 #ps
+duration = 1e-8 #s
 
 # source
-src_x = 256
-src_y = 256
-src_mu = 0.02 #ps
-src_sigma = 0.005 #ps
-src_amp = 5
+src_x = 200
+src_y = 200
+src_mu = 2 #ps
+src_sigma = 5 #ps
+src_amp = 0.01
 
 # geo
-center_x = 20 #um
-center_y = 20 #um
+center_x = 20 #m
+center_y = 20 #m
 radius = 5 #um
-geo_ep = 12
-geo_mu = 5
+geo_ep = 1
+geo_mu = 1
 
 # speed of light
-sp_light = 299792458 / 1000000 # m/s to um/ps
+sp_light = 299792458 # m/s
 
 save_per_frame = 10
 save_ckpt = False
-exp_name = "free_space_plate2"
+exp_name = "free_space_plate3"
+
+tau = 1.0e-10;
+t0 = 5.0e-10;
+#Source Calculations
+# t=np.arange(0,steps-1)*dt;
+# s=dx/(2*c0)+dt/2;
+# Esrc =np.exp(-(np.power((t-t0)/tau,2)));
