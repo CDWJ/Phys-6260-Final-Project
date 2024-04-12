@@ -36,7 +36,7 @@ def write_field(img, outdir, i, cell_type=None, vmin=0, vmax=1, dpi=512//8):
     fig.savefig(os.path.join(outdir, '{:04d}.png'.format(i)), dpi = dpi)
     plt.close()
 
-dx = 1.0 / res_y
+dx = scene_y / res_y
 inv_dx = 1.0 / dx
 half_dx = 0.5 * dx
 upper_boundary = 1 - half_dx
@@ -44,8 +44,8 @@ lower_boundary = half_dx
 right_boundary = res_x * dx - half_dx
 left_boundary = half_dx
 NPML=[40, 40, 40, 40]
-Nx2 = 2*res_x;
-Ny2 = 2*res_y;
+Nx2 = 2*res_x
+Ny2 = 2*res_y
 
 def choose_dt():
     cell_size = scene_y / res_y
@@ -245,8 +245,10 @@ def update_Ez():
 @ti.kernel
 def add_source(amp:float, mu:float, sigma:float, prime:ti.template(), time:float, position_x:float, position_y:float):       # in cartesian coordinates
     omega = pi/3             # angular speed for the spin of neutron star
-    R = 1e-2
-    I = 1
+    # R = 1e-2
+    R = 11e3 * 1e-5
+    # I = 1
+    I = 1.056e23 
     m_mag = I * pi*R**2      # magnitude of magnetic dipole moment of the current loop (representing the neutron star)
     phi = omega*time*1e10               # phi angle in a spherical coordinates
     theta = pi/6             # theta angle in a spherical coordinates, also the inclination between m and the spin axis
@@ -258,7 +260,6 @@ def add_source(amp:float, mu:float, sigma:float, prime:ti.template(), time:float
         if i >= NPML[0] and i <= res_x - NPML[1] - 1 and j >= NPML[2] and j <= res_y - NPML[3]:
             theta = pi/6 
             m = ti.Vector([m_mag*ti.sin(theta)*ti.cos(phi), m_mag*ti.sin(theta)*ti.sin(phi), m_mag*ti.cos(theta)]) 
-
             r = ti.Vector([(i - 0.5) * dx - 0.5, (j) * dx - 0.4, 0.0])
             r_mag = magnitude = ti.math.length(r)
             r_hat = r/r_mag
@@ -267,7 +268,6 @@ def add_source(amp:float, mu:float, sigma:float, prime:ti.template(), time:float
         if i >= NPML[0] and i <= res_x - NPML[1] - 1 and j >= NPML[2] and j <= res_y - NPML[3]:
             theta = -pi/6 
             m = ti.Vector([m_mag*ti.sin(theta)*ti.cos(phi), m_mag*ti.sin(theta)*ti.sin(phi), m_mag*ti.cos(theta)]) 
-
             r = ti.Vector([(i - 0.5) * dx - 0.5, (j) * dx - 0.6, 0.0])
             r_mag = magnitude = ti.math.length(r)
             r_hat = r/r_mag
@@ -345,7 +345,7 @@ def main(testing=False):
     ckptdir = os.path.join(logsdir, ckptdir)
     os.makedirs(ckptdir, exist_ok=True)
 
-    shutil.copyfile('./hyperparams.py', f'{logsdir}/hyperparams.py')
+    shutil.copyfile('/Users/noahzhang/OneDrive - Georgia Institute of Technology/Comp Phy/Phys-6260-Final-Project/hyperparams.py', f'{logsdir}/hyperparams.py')
     
     write_field(Ez.to_numpy(), fielddir, 0, vmin=0, vmax=src_amp/20)
     
