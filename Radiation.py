@@ -4,11 +4,19 @@ import matplotlib.pyplot as plt
 from hyperparams import *
 
 # Constants
-c = 3e8
-q = 1.6e-19  # Charge of the electron (Coulombs)
-m = 9.11e-31  # Mass of the electron (kg)
-epsilon0 = 8.85e-12     # vaccum permittivity
-mu0 = 1.26e-6
+c = sp_light
+# q = 1.6e-19  # Charge of the electron (Coulombs)
+# m = 9.11e-31  # Mass of the electron (kg)
+# epsilon0 = 8.85e-12     # vaccum permittivity
+# mu0 = 1.26e-6
+
+# create the grid map
+x = np.linspace(-scene_x/2, scene_x/2, res_x)
+y = np.linspace(-scene_y/2, scene_y/2, res_y)
+x, y = np.meshgrid(x, y)
+
+src_x = 0.
+src_y = 0.
 
 # Magnetic field and electric field in 2D
 
@@ -27,6 +35,13 @@ Ey = np.zeros(Ez.shape)
 # number density of electrons
 n = np.full(Ez.shape, n0)
 
+avgVel = 0.1*c #system velocity which will probably be set to 0.1 times the speed of light
+standDev = 0.01*c
+normVelMag = np.random.normal(avgVel, standDev, 1)[0] #magnitude of the velocity pulled from a gaussian distribution with a standard deviation of 0.01
+dist = np.sqrt(np.power(x - src_x) + np.power(y - src_y))
+vx = np.divide((x - src_x), dist) * normVelMag
+vy = np.divide((y - src_y), dist) * normVelMag
+vz = np.zeros(vx.shape)      
 
 #return vector of dv/dt from lorentz force and initial velocity
 def acceleration(vx, vy, vz, t): 
@@ -38,7 +53,7 @@ def acceleration(vx, vy, vz, t):
     return ax, ay, az
 
 
-tpoints = np.arange(a,b,h)
+tpoints = np.arange(0., duration, dt)
 power_all = np.empty(Ez.shape)
 
 
@@ -50,16 +65,15 @@ vz = np.full(Ez.shape, 0.5*c)
 
 
 def evo(tpoints, vx, vy, vz):
-    h = tpoint[1] - tpoints[0]
     for i,t in enumerate(tpoints,1):
 
         if i != 0:
 
             # updating velociteis
-            k1_x, k1_y, k1_z = h * acceleration(vx, vy, vz, t)
-            k2_x, k2_y, k2_z = h * acceleration(vx + 0.5*k1, vy + 0.5*k1, vz + 0.5*k1)
-            k3_x, k3_y, k3_z = h * acceleration(vx + 0.5*k2, vy + 0.5*k2, vz + 0.5*k2)
-            k4_x, k4_y, k4_z = h * acceleration(vx + k3, vy + k3, vz + k3)
+            k1_x, k1_y, k1_z = dt * acceleration(vx, vy, vz, t)
+            k2_x, k2_y, k2_z = dt * acceleration(vx + 0.5*k1, vy + 0.5*k1, vz + 0.5*k1)
+            k3_x, k3_y, k3_z = dt * acceleration(vx + 0.5*k2, vy + 0.5*k2, vz + 0.5*k2)
+            k4_x, k4_y, k4_z = dt * acceleration(vx + k3, vy + k3, vz + k3)
             vx += (k1_x + 2*k2_x + 2*k3_x + k4_x) / 6.0
             vy += (k1_y + 2*k2_y + 2*k3_y + k4_y) / 6.0
             vx += (k1_z + 2*k2_z + 2*k3_z + k4_z) / 6.0   
@@ -80,8 +94,8 @@ def evo(tpoints, vx, vy, vz):
                 # if their velocity is large enough for them to reach the other grid point, we allow a change of
                 # 0.5(this can be set to other fraction) of the orginal number density
 
-                step_x = int( ((vx[j,k]*h) % dx) / (0.5 * dx) )
-                step_y = int( ((vy[j,k]*h) % dx) / (0.5 * dx) )
+                step_x = int( ((vx[j,k]*dt) % dx) / (0.5 * dx) )
+                step_y = int( ((vy[j,k]*dt) % dx) / (0.5 * dx) )
                 n[j,k] -= fluc
                 newj = (j + step_x) % res_x
                 newk = (k + step_y) % res_y

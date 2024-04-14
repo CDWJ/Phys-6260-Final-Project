@@ -1,13 +1,13 @@
 # scene
-res_x = 400
-res_y = 400
+res_x = 401
+res_y = 401
 # Assuming the side of the domain is 1e5 m then we normalize everything accordingly
 scene_x = 1 #m 
 scene_y = 1 #m
 ep = 8.8541878176e-12
 mu = 1.
 duration = 1e-9 #s
-#dt = 1e-12
+dt = 1e-12
 
 # source
 src_x = 200
@@ -25,6 +25,12 @@ geo_mu = 1
 
 # speed of light
 sp_light = 299792458 # m/s
+sp_light = sp_light/1e5
+
+q = 1.6e-19  # Charge of the electron (Coulombs)
+m = 9.11e-31  # Mass of the electron (kg)
+epsilon0 = 8.85e-12     # vaccum permittivity
+mu0 = 1.26e-6
 
 save_per_frame = 10
 save_ckpt = False
