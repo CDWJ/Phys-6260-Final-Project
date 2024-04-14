@@ -7,7 +7,7 @@ c = 3e8
 q = 1.6e-19  # Charge of the electron (Coulombs)
 m = 9.11e-31  # Mass of the electron (kg)
 epsilon0 = 8.85e-12     # vaccum permittivity
-
+mu0 = 1.26e-6
 
 # Magnetic field and electric field in 2D
 
@@ -15,9 +15,14 @@ Hx = grid.Hx
 Hy = grid.Hy
 Hz = np.zeros(Hx.shape)
 
+Bx = Hx*mu0
+By = Hy*mu0
+Bz = Hz*mu0
+
 Ez = grid.Ez
 Ex = np.zeros(Ez.shape)
 Ey = np.zeros(Ez.shape)
+
 
 print(Ez.shape)
 
@@ -35,9 +40,15 @@ def acceleration(vx, vy, vz, t):
 
 
 tpoints = np.arange(a,b,h)
-v = np.zeros((N,3))
-v[0] = [1.0, 1.0, 1.0]
 power_all = np.empty(Ez.shape)
+
+
+# we are doing 2D computation first 
+# if we are looking at xy plane with z = 0 
+vx = np.zeros(Ez.shape)
+vy = np.zeros(Ez.shape)
+vz = np.full(Ez.shape, 0.5*c)
+
 
 def evo(tpoints, vx, vy, vz):
     h = tpoint[1] - tpoints[0]
