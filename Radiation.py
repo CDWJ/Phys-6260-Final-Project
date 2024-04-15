@@ -20,9 +20,11 @@ src_y = 0.
 
 # Magnetic field and electric field in 2D
 
-Hx = grid.Hx
-Hy = grid.Hy
-Hz = np.zeros(Hx.shape)
+# Hx = grid.Hx.to_numpy()
+# Hy = grid.Hy.to_numpy()
+Hx = Hx.to_numpy()
+Hy = Hy.to_numpy()
+Hz = np.zeros(np.shape(Hx))
 
 Bx = Hx*mu0
 By = Hy*mu0
@@ -39,15 +41,17 @@ avgVel = 0.1*c #system velocity which will probably be set to 0.1 times the spee
 standDev = 0.01*c
 normVelMag = np.random.normal(avgVel, standDev, 1)[0] #magnitude of the velocity pulled from a gaussian distribution with a standard deviation of 0.01
 dist = np.sqrt(np.power(x - src_x) + np.power(y - src_y))
-vx = np.divide((x - src_x), dist) * normVelMag
-vy = np.divide((y - src_y), dist) * normVelMag
-vz = np.zeros(vx.shape)      
+theta = np.arctan(np.divide(y - src_y, x - src_x))
+vx = np.sin(theta) * normVelMag
+vy = np.cos(theta) * normVelMag
+vz = np.zeros(vx.shape)   
 
 #return vector of dv/dt from lorentz force and initial velocity
 def acceleration(vx, vy, vz, t): 
 
-    ax = (q/m)*(Ex + (vy * Bz) - (vz * By))
-    ay = (q/m)*(Ey + (vz * Bx) - (vx * Bz))
+    v_mag_2 = np.square(vx) + np.square(vy) + np.square(vz)
+    ax = (q/m)*(Ex + (vy * Bz) - (vz * By)) - np.divide(v_mag_2, dist) * np.cos(theta)
+    ay = (q/m)*(Ey + (vz * Bx) - (vx * Bz)) - np.divide(v_mag_2, dist) * np.sin(theta)
     az = (q/m)*(Ez + (vx * By) - (vy * Bx))
 
     return ax, ay, az
@@ -85,8 +89,8 @@ def evo(tpoints, vx, vy, vz):
 
         fluc = 0.5 * n
 
-        for j in np.shape(vx)[0]:
-            for k in np.shape(vx)[1]:
+        for j in range(np.shape(vx)[0]):
+            for k in range(np.shape(vx)[1]):
 
                 # updating the number density of electrons by tracking their motion
                 # since we do only 2D computation, we currently ignore the fluctuation in z direction only track 
@@ -97,9 +101,12 @@ def evo(tpoints, vx, vy, vz):
                 step_x = int( ((vx[j,k]*dt) % dx) / (0.5 * dx) )
                 step_y = int( ((vy[j,k]*dt) % dx) / (0.5 * dx) )
                 n[j,k] -= fluc
-                newj = (j + step_x) % res_x
-                newk = (k + step_y) % res_y
-                n[newj, newk] += fluc 
+                # newj = (j + step_x) % res_x
+                # newk = (k + step_y) % res_y
+                newj = j + step_x
+                newk = k + step_y
+                if newj < np.shape(vx)[0] - 1 & newj > 0 & newk < np.shape(vx)[1] - 1 & newk > 0:
+                    n[newj, newk] += fluc 
 
                 # we only care about the acceleration perpendicular to velocity, as required by 
                 # the equation of synchrontron radiation
