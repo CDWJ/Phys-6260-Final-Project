@@ -89,8 +89,8 @@ def evo(tpoints, vx, vy, vz):
 
         fluc = 0.5 * n
 
-        for j in np.shape(vx)[0]:
-            for k in np.shape(vx)[1]:
+        for j in range(np.shape(vx)[0]):
+            for k in range(np.shape(vx)[1]):
 
                 # updating the number density of electrons by tracking their motion
                 # since we do only 2D computation, we currently ignore the fluctuation in z direction only track 
@@ -101,9 +101,12 @@ def evo(tpoints, vx, vy, vz):
                 step_x = int( ((vx[j,k]*dt) % dx) / (0.5 * dx) )
                 step_y = int( ((vy[j,k]*dt) % dx) / (0.5 * dx) )
                 n[j,k] -= fluc
-                newj = (j + step_x) % res_x
-                newk = (k + step_y) % res_y
-                n[newj, newk] += fluc 
+                # newj = (j + step_x) % res_x
+                # newk = (k + step_y) % res_y
+                newj = j + step_x
+                newk = k + step_y
+                if newj < np.shape(vx)[0] - 1 & newj > 0 & newk < np.shape(vx)[1] - 1 & newk > 0:
+                    n[newj, newk] += fluc 
 
                 # we only care about the acceleration perpendicular to velocity, as required by 
                 # the equation of synchrontron radiation
