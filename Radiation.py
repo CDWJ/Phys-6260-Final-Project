@@ -44,13 +44,14 @@ dist = np.sqrt(np.power(x - src_x) + np.power(y - src_y))
 theta = np.arctan(np.divide(y - src_y, x - src_x))
 vx = np.sin(theta) * normVelMag
 vy = np.cos(theta) * normVelMag
-vz = np.zeros(vx.shape)      
+vz = np.zeros(vx.shape)   
 
 #return vector of dv/dt from lorentz force and initial velocity
 def acceleration(vx, vy, vz, t): 
 
-    ax = (q/m)*(Ex + (vy * Bz) - (vz * By))
-    ay = (q/m)*(Ey + (vz * Bx) - (vx * Bz))
+    v_mag_2 = np.square(vx) + np.square(vy) + np.square(vz)
+    ax = (q/m)*(Ex + (vy * Bz) - (vz * By)) - np.divide(v_mag_2, dist) * np.cos(theta)
+    ay = (q/m)*(Ey + (vz * Bx) - (vx * Bz)) - np.divide(v_mag_2, dist) * np.sin(theta)
     az = (q/m)*(Ez + (vx * By) - (vy * Bx))
 
     return ax, ay, az
