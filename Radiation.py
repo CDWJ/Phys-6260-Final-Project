@@ -20,9 +20,11 @@ src_y = 0.
 
 # Magnetic field and electric field in 2D
 
-Hx = grid.Hx
-Hy = grid.Hy
-Hz = np.zeros(Hx.shape)
+# Hx = grid.Hx.to_numpy()
+# Hy = grid.Hy.to_numpy()
+Hx = Hx.to_numpy()
+Hy = Hy.to_numpy()
+Hz = np.zeros(np.shape(Hx))
 
 Bx = Hx*mu0
 By = Hy*mu0
@@ -39,8 +41,9 @@ avgVel = 0.1*c #system velocity which will probably be set to 0.1 times the spee
 standDev = 0.01*c
 normVelMag = np.random.normal(avgVel, standDev, 1)[0] #magnitude of the velocity pulled from a gaussian distribution with a standard deviation of 0.01
 dist = np.sqrt(np.power(x - src_x) + np.power(y - src_y))
-vx = np.divide((x - src_x), dist) * normVelMag
-vy = np.divide((y - src_y), dist) * normVelMag
+theta = np.arctan(np.divide(y - src_y, x - src_x))
+vx = np.sin(theta) * normVelMag
+vy = np.cos(theta) * normVelMag
 vz = np.zeros(vx.shape)      
 
 #return vector of dv/dt from lorentz force and initial velocity
