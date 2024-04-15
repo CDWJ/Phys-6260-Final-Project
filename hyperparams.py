@@ -1,7 +1,7 @@
 # scene
 res_x = 401
 res_y = 401
-# Assuming the side of the domain is 1e5 m then we normalize everything accordingly
+# Assuming the side of the domain is 1e11 m then we normalize everything accordingly
 scene_x = 1 #m 
 scene_y = 1 #m
 ep = 8.8541878176e-12
