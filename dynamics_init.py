@@ -63,7 +63,7 @@ class dynamicObject:
         newTime = self.time + self.timestep
         self.time = newTime
 
-    def getPos(self, dt):
+    def getPos(self):
         return self.pos
     
     def getVelovity(self):
