@@ -2,30 +2,36 @@ import numpy as np
 
 
 class dynamicObject:
-    def __init__(self,vel,pos,dist,time,accel,mass, timestep):
+    def __init__(self,vel,pos,time,accel,mass, timestep):
         """
+        All arrays are in form (x, y, z) or their corresponding unit vectors
         Args:
             self (): self
             vel (ndarray): average direction array for the objects's initial velocity
-            dist (float): distance of the charge density from the center of mass in the system
+            pos (ndarray): position vector for the object
             time (float): the current time step from simulation start where t=0 in s (or ms?)
+            accel (ndarray): the acceleration vector for the system
             mass (float): object mass in kg
             timestep(float): constant timestep in the system
         """
         self.vel = vel
         self.pos = pos
-        self.dist = dist
         self.time = time
         self.accel = accel
         self.mass = mass
         self.timestep = timestep
 
-    def getVelovity(self):
-        return self.vel
+    def getDist(self):
+        """returns the distance (float): distance of the charge density from the center of mass in the system. (Assuming the center of mass
+        is at position (0,0,0))
+        """
+        cent = np.array([0,0,0])
+        dist = np.sqrt(self.pos[0]**2 + self.pos[1]**2 + self.pos[-1]**2)
+        return dist
     
     def updateAccel(self, force):
         """
-        updates the acceleration of the object.
+        updates the acceleration of the object based on the force on the object
         Args:
             force(ndarray): total force on the system
         """
@@ -45,21 +51,28 @@ class dynamicObject:
 
     
     def updatePos(self, newVel):
-        newPos = (self.vel+newVel)*self.timestep/2
+        """
+        updates the position based on the new velocities
+            Args:
+                newAccel(ndArray): acceleration vector
+        """
+        newPos = (self.vel + newVel)*self.timestep/2
         self.pos = newPos
     
+    def updateTime(self):
+        newTime = self.time + self.timestep
+        self.time = newTime
 
     def getPos(self, dt):
-        """
-        Args:
-            self (): self
-        """
-        self.vel
+        return self.pos
+    
+    def getVelovity(self):
+        return self.vel
 
 
 class chargeDensity(dynamicObject):
 
-    def __init__(self, charge,Lforce, vel, pos, dist,time, accel, mass, timestep):
+    def __init__(self, charge, Lforce, vel, pos, time, accel, mass, timestep):
         """
         Args:
             self (): self
@@ -69,8 +82,14 @@ class chargeDensity(dynamicObject):
         self.charge = charge
         self.mass = mass
         self.Lforce = Lforce
+
+        #the attributes that need to be initialized for __calculateInitVel() to work
+        self.vel = vel
+        self.pos = pos
+        self.time = time
+
         self.__calculateInitVel()
-        dynamicObject.__init__(self, vel, pos, dist,time, accel, mass, timestep) 
+        dynamicObject.__init__(self, vel, pos, time, accel, mass, timestep) 
 
     def __calculateInitVel(self):
         """
@@ -80,14 +99,15 @@ class chargeDensity(dynamicObject):
         avgVel = self.vel #system velocity which will probably be set to 0.5 times the speed of light
         standDev = 0.01
         normVelMag = np.random.normal(avgVel, standDev, 1)[0] #magnitude of the velocity pulled from a gaussian distribution with a standard deviation of 0.01
-        velVec = np.array([normVelMag*(-np.sin(normVelMag*self.time/self.dist)), normVelMag*(np.cos(normVelMag*self.time/self.dist)),0]) #velocity vector in cartestian coordinates
+        dist = self.getDist()
+        velVec = np.array([normVelMag*(-np.sin(normVelMag*self.time/dist)), normVelMag*(np.cos(normVelMag*self.time/dist)),0]) #velocity vector in cartestian coordinates
         self.vel = velVec
 
     def getCharge(self):
         return self.charge
     
-    def getMass(self):
-        numb =  #number density of our electrons
+    #def getMass(self):
+    #    numb = #number density of our electrons
 
     def updateLforce(self, extforce):
         """
@@ -98,7 +118,7 @@ class chargeDensity(dynamicObject):
         self.updateForce(updated)
 
     def getcentrifugalForce(self):
-        return self.mass*(self.vel**2/self.dist)
+        return self.mass*(self.vel**2/self.getDist())
 
     def updateForce(self, newLforce):
         updated = newLforce + self.getcentrifugalForce()
